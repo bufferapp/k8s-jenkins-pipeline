@@ -137,10 +137,9 @@ def helmTest(Map args) {
 
 def containerBuildPub(Map args) {
 
-    println "Running Docker build/publish: ${args.host}/${args.acct}/${args.repo}:${args.tags} with credentials in Jenkins ${args.auth_id}"
-
     for (int i = 0; i < args.tags.size(); i++) {
-      sh "docker build -t ${args.acct}/${args.repo}:${args.tags[i]} ./"
-      sh "docker push ${args.acct}/${args.repo}:${args.tags[i]}"
+        println "Running Docker build/publish: ${args.repo}:${args.tags[i]} with credentials in Jenkins ${args.auth_id}"
+        sh "docker build -t ${args.repo}:${args.tags[i]} ./"
+        sh "docker push ${args.repo}:${args.tags[i]}"
     }
 }
