@@ -144,7 +144,7 @@ def containerBuildPub(Map args) {
     }
 }
 
-def start() {
+def start(String jenkinsConfigFile) {
 
     podTemplate(label: 'pipeline-pod', containers: [
         containerTemplate(name: 'docker', image: 'docker:17.06.0', ttyEnabled: true, command: 'cat'),
@@ -157,7 +157,7 @@ def start() {
 
       node ('pipeline-pod') {
         // read in required jenkins workflow config values
-        def inputFile = readFile('Jenkinsfile.json')
+        def inputFile = readFile(jenkinsConfigFile)
         def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
         println "pipeline config ==> ${config}"
 
