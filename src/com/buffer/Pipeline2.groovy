@@ -159,8 +159,6 @@ def start(Map config) {
         def pwd = pwd()
         def chart_dir = "${pwd}/${config.app.name}"
 
-        checkout scm
-
         // continue only if pipeline enabled
         if (!config.pipeline.enabled) {
             println "pipeline disabled"
