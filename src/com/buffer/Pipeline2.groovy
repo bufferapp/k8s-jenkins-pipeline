@@ -2,26 +2,22 @@
 
 package com.buffer;
 
-def gitEnvVars() {
-    // create git envvars
-    println "Setting envvars to tag container"
+def gitVars() {
+    def rv = [:]
+    // create git vars
+    println "Getting Git vars"
 
     sh 'git rev-parse HEAD > git_commit_id.txt'
     try {
-        env.GIT_COMMIT_ID = readFile('git_commit_id.txt').trim()
-        env.GIT_SHA = env.GIT_COMMIT_ID.substring(0, 7)
+        rv.put('GIT_COMMIT_ID', readFile('git_commit_id.txt').trim())
     } catch (e) {
         error "${e}"
     }
-    println "env.GIT_COMMIT_ID ==> ${env.GIT_COMMIT_ID}"
+    println "GIT_COMMIT_ID ==> ${rv['GIT_COMMIT_ID']}"
 
-    sh 'git config --get remote.origin.url> git_remote_origin_url.txt'
-    try {
-        env.GIT_REMOTE_URL = readFile('git_remote_origin_url.txt').trim()
-    } catch (e) {
-        error "${e}"
-    }
-    println "env.GIT_REMOTE_URL ==> ${env.GIT_REMOTE_URL}"
+    rv.put('BRANCH_NAME', env.BRANCH_NAME)
+
+    return rv
 }
 
 def kubectlTest() {
@@ -47,41 +43,41 @@ def getContainerTags(config, Map tags = [:]) {
 
     try {
         // if PR branch tag with only branch name
-        if (env.BRANCH_NAME.contains('PR')) {
-            commit_tag = env.BRANCH_NAME
+        if (config.BRANCH_NAME.contains('PR')) {
+            commit_tag = config.BRANCH_NAME
             tags << ['commit': commit_tag]
             return tags
         }
     } catch (Exception e) {
-        println "WARNING: commit unavailable from env. ${e}"
+        println "WARNING: commit unavailable from config. ${e}"
     }
 
     // commit tag
     try {
         // if branch available, use as prefix, otherwise only commit hash
-        if (env.BRANCH_NAME) {
-            commit_tag = env.BRANCH_NAME + '-' + env.GIT_COMMIT_ID.substring(0, 7)
+        if (config.BRANCH_NAME) {
+            commit_tag = config.BRANCH_NAME + '-' + config.GIT_COMMIT_ID.substring(0, 7)
         } else {
-            commit_tag = env.GIT_COMMIT_ID.substring(0, 7)
+            commit_tag = config.GIT_COMMIT_ID.substring(0, 7)
         }
         tags << ['commit': commit_tag]
     } catch (Exception e) {
-        println "WARNING: commit unavailable from env. ${e}"
+        println "WARNING: commit unavailable from config. ${e}"
     }
 
     // master tag
     try {
-        if (env.BRANCH_NAME == 'master') {
+        if (config.BRANCH_NAME == 'master') {
             tags << ['master': 'latest']
         }
     } catch (Exception e) {
-        println "WARNING: branch unavailable from env. ${e}"
+        println "WARNING: branch unavailable from config. ${e}"
     }
 
     // build tag only if none of the above are available
     if (!tags) {
         try {
-            tags << ['build': env.BUILD_TAG]
+            tags << ['build': config.BUILD_TAG]
         } catch (Exception e) {
             println "WARNING: build tag unavailable from config.project. ${e}"
         }
@@ -165,9 +161,6 @@ def start(Map config) {
             return
         }
 
-        // set additional git envvars for image tagging
-        gitEnvVars()
-
         // If pipeline debugging enabled
         if (config.pipeline.debug) {
           println "DEBUG ENABLED"
@@ -223,7 +216,7 @@ def start(Map config) {
         }
 
         // deploy only the master branch
-        if (env.BRANCH_NAME == 'master') {
+        if (config.BRANCH_NAME == 'master') {
           stage ('Deploy to k8s with Helm') {
             container('helm') {
               // Deploy using Helm chart
