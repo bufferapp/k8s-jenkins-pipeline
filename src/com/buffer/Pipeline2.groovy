@@ -152,6 +152,7 @@ def start(Map config) {
     ]){
 
       node ('pipeline-pod') {
+        checkout scm
         def pwd = pwd()
         def chart_dir = "${pwd}/${config.app.name}"
 
