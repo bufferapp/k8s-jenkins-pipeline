@@ -153,6 +153,12 @@ def start(Map config) {
 
       node ('pipeline-pod') {
         checkout scm
+        // read in required jenkins workflow config values
+        def inputFile = readFile('Jenkinsfile.json')
+        def newConfig = new groovy.json.JsonSlurperClassic().parseText(inputFile)
+        newConfig = newConfig + gitVars()
+        println "new pipeline config ==> ${config}"
+
         def pwd = pwd()
         def chart_dir = "${pwd}/${config.app.name}"
 
