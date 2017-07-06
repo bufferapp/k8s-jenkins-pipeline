@@ -145,7 +145,8 @@ def start(String configFile) {
     podTemplate(label: 'pipeline-pod', containers: [
         containerTemplate(name: 'docker', image: 'docker:17.06.0', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.4.2', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.6.6', ttyEnabled: true, command: 'cat')
+        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.6.6', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'node', image: 'node:8.1.3', ttyEnabled: true, command: 'cat')
     ],
     volumes:[
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
@@ -202,6 +203,16 @@ def start(String configFile) {
               chart_dir     : chart_dir
             )
           }
+        }
+
+        if (fileExists('pre-build.sh')) {
+            println "Found pre-build"
+                stage ('Bundling and Uploading Static Assets') {
+                container('node') {
+                    println "${env.AWS_ACCESS_KEY_ID} and ${env.AWS_SECRET_ACCESS_KEY}"
+                    sh "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} ./pre-build.sh"
+                }
+            }
         }
 
         stage ('Publish Container') {
