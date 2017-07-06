@@ -234,6 +234,7 @@ def start(String configFile) {
         }
 
         // deploy only the master branch
+        // For now we deploy all branches
         if (config.BRANCH_NAME == 'master') {
           stage ('Deploy to k8s with Helm') {
             container('helm') {
@@ -254,6 +255,27 @@ def start(String configFile) {
               }
             }
           }
+        } else {
+            stage ('Deploy to k8s with Helm') {
+                container('helm') {
+                  // Deploy using Helm chart
+                  helmDeploy(
+                    dry_run       : false,
+                    name          : config.app.name,
+                    namespace     : config.app.namespace,
+                    version_tag   : image_tags_list.get(0),
+                    chart_dir     : chart_dir
+                  )
+
+                  //  Run helm tests
+                  if (config.app.test) {
+                    helmTest(
+                      name          : config.app.name
+                    )
+                  }
+                }
+          }
+
         }
       }
     }
