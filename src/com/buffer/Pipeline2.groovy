@@ -15,7 +15,7 @@ def gitVars() {
     }
     println "GIT_COMMIT_ID ==> ${rv['GIT_COMMIT_ID']}"
 
-    rv.put('BRANCH_NAME', env.BRANCH_NAME)
+    rv.put('BRANCH_NAME', env.BRANCH_NAME.replace("/", "-"))
 
     return rv
 }
