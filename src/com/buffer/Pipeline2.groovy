@@ -128,7 +128,7 @@ def helmDeploy(Map args) {
 def helmTest(Map args) {
     println "Running Helm test"
 
-    sh "helm test ${args.name} --cleanup"
+    sh "helm test ${args.branch_name}-${args.name} --cleanup"
 }
 
 def containerBuildPub(Map args) {
@@ -271,7 +271,8 @@ def start(String configFile) {
                   //  Run helm tests
                   if (config.app.test) {
                     helmTest(
-                      name          : config.app.name
+                      name          : config.app.name,
+                      branch_name   : config.BRANCH_NAME
                     )
                   }
                 }
