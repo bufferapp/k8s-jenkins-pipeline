@@ -116,10 +116,10 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.branch_name}-${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},branch_name=${args.branch_name} --namespace=${args.namespace}"
+        sh "helm upgrade --dry-run --install ${args.branch_name}-${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},branchName=${args.branch_name} --namespace=${args.namespace}"
     } else {
         println "Running deployment"
-        sh "helm upgrade --install --wait ${args.branch_name}-${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},branch_name=${args.branch_name} --namespace=${args.namespace}"
+        sh "helm upgrade --install --wait ${args.branch_name}-${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},branchName=${args.branch_name} --namespace=${args.namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
