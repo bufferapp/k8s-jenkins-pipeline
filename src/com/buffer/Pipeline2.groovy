@@ -116,10 +116,10 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag} --namespace=${args.namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},branch_name=${args.branch_name} --namespace=${args.namespace}"
     } else {
         println "Running deployment"
-        sh "helm upgrade --install --wait ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag} --namespace=${args.namespace}"
+        sh "helm upgrade --install --wait ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},branch_name=${args.branch_name} --namespace=${args.namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
@@ -236,25 +236,25 @@ def start(String configFile) {
         // deploy only the master branch
         // For now we deploy all branches
         if (config.BRANCH_NAME == 'master') {
-          stage ('Deploy to k8s with Helm') {
-            container('helm') {
-              // Deploy using Helm chart
-              helmDeploy(
-                dry_run       : false,
-                name          : config.app.name,
-                namespace     : config.app.namespace,
-                version_tag   : image_tags_list.get(0),
-                chart_dir     : chart_dir
-              )
+          // stage ('Deploy to k8s with Helm') {
+          //   container('helm') {
+          //     // Deploy using Helm chart
+          //     helmDeploy(
+          //       dry_run       : false,
+          //       name          : config.app.name,
+          //       namespace     : config.app.namespace,
+          //       version_tag   : image_tags_list.get(0),
+          //       chart_dir     : chart_dir
+          //     )
 
-              //  Run helm tests
-              if (config.app.test) {
-                helmTest(
-                  name          : config.app.name
-                )
-              }
-            }
-          }
+          //     //  Run helm tests
+          //     if (config.app.test) {
+          //       helmTest(
+          //         name          : config.app.name
+          //       )
+          //     }
+          //   }
+          // }
         } else {
             stage ('Deploy to k8s with Helm') {
                 container('helm') {
@@ -264,7 +264,8 @@ def start(String configFile) {
                     name          : config.app.name,
                     namespace     : config.app.namespace,
                     version_tag   : image_tags_list.get(0),
-                    chart_dir     : chart_dir
+                    chart_dir     : chart_dir,
+                    branch_name   : config.BRANCH_NAME
                   )
 
                   //  Run helm tests
