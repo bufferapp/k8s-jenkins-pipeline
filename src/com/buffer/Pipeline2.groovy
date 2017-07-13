@@ -281,4 +281,3 @@ def start(String configFile) {
         }
       }
     }
-}
