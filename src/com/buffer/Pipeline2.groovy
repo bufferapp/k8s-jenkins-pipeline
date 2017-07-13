@@ -140,25 +140,25 @@ def containerBuildPub(Map args) {
     }
 }
 
-def notifyBuild(Map args) {
-  // build status of null means successful
-  buildStatus =  args.build_status ?: 'SUCCESSFUL'
+// def notifyBuild(Map args) {
+//   // build status of null means successful
+//   buildStatus =  args.build_status ?: 'SUCCESSFUL'
 
-  // Default values
-  def colorCode = '#FF0000'
+//   // Default values
+//   def colorCode = '#FF0000'
 
-  // Override default values based on build status
-  if (buildStatus == 'STARTED') {
-    colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESSFUL') {
-    colorCode = '#00FF00'
-  } else {
-    colorCode = '#FF0000'
-  }
+//   // Override default values based on build status
+//   if (buildStatus == 'STARTED') {
+//     colorCode = '#FFFF00'
+//   } else if (buildStatus == 'SUCCESSFUL') {
+//     colorCode = '#00FF00'
+//   } else {
+//     colorCode = '#FF0000'
+//   }
 
-  // Send notifications
-  slackSend (color: colorCode, message: "${buildStatus} - ${args.branch_name}:${args.git_commit_id} \nDeployment URL - (<${args.branch_name}.${args.deployment_url}|Open>)")
-}
+//   // Send notifications
+//   slackSend (color: colorCode, message: "${buildStatus} - ${args.branch_name}:${args.git_commit_id} \nDeployment URL - (<${args.branch_name}.${args.deployment_url}|Open>)")
+// }
 
 def start(String configFile) {
 
