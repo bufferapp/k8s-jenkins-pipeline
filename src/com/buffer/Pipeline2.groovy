@@ -184,12 +184,12 @@ def start(String configFile) {
         def pwd = pwd()
         def chart_dir = "${pwd}/${config.app.name}"
 
-        notifyBuild(
-          branch_name      : config.BRANCH_NAME,
-          deployment_url   : config.deployment_url ?: 'example.com',
-          git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-          build_status     : 'STARTED'
-        )
+        // notifyBuild(
+        //   branch_name      : config.BRANCH_NAME,
+        //   deployment_url   : config.deployment_url ?: 'example.com',
+        //   git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+        //   build_status     : 'STARTED'
+        // )
 
         // continue only if pipeline enabled
         if (!config.pipeline.enabled) {
@@ -308,12 +308,12 @@ def start(String configFile) {
 
         }
 
-        notifyBuild(
-          branch_name      : config.BRANCH_NAME,
-          deployment_url   : config.deployment_url ?: 'example.com',
-          git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-          build_status      : 'SUCCESSFUL'
-        )
+        // notifyBuild(
+        //   branch_name      : config.BRANCH_NAME,
+        //   deployment_url   : config.deployment_url ?: 'example.com',
+        //   git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+        //   build_status      : 'SUCCESSFUL'
+        // )
       }
     }
 }
