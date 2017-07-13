@@ -140,6 +140,26 @@ def containerBuildPub(Map args) {
     }
 }
 
+def notifyBuild(Map args) {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+
+  // Default values
+  def colorCode = '#FF0000'
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESSFUL') {
+    colorCode = '#00FF00'
+  } else {
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: "${args.build_status} - ${args.branch_name}:${args.git_commit_id} \nDeployment URL - (<${args.branch_name}.${args.deployment_url}|Open>)")
+}
+
 def start(String configFile) {
 
     podTemplate(label: 'pipeline-pod', containers: [
@@ -153,6 +173,7 @@ def start(String configFile) {
     ]){
 
       node ('pipeline-pod') {
+
         checkout scm
         // read in required jenkins workflow config values
         def inputFile = readFile(configFile)
@@ -162,6 +183,13 @@ def start(String configFile) {
 
         def pwd = pwd()
         def chart_dir = "${pwd}/${config.app.name}"
+
+        notifyBuild(
+          branch_name      : config.BRANCH_NAME,
+          deployment_url   : config.deployment_url ?: 'example.com',
+          git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+          build_status     : 'STARTED'
+        )
 
         // continue only if pipeline enabled
         if (!config.pipeline.enabled) {
@@ -279,6 +307,13 @@ def start(String configFile) {
           }
 
         }
+
+        notifyBuild(
+          branch_name      : config.BRANCH_NAME,
+          deployment_url   : config.deployment_url ?: 'example.com',
+          git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+          buildStatus      : 'SUCCESSFUL'
+        )
       }
     }
 }
