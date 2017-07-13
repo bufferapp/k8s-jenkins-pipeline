@@ -142,7 +142,7 @@ def containerBuildPub(Map args) {
 
 def notifyBuild(Map args) {
   // build status of null means successful
-  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  buildStatus =  args.build_status ?: 'SUCCESSFUL'
 
   // Default values
   def colorCode = '#FF0000'
@@ -157,7 +157,7 @@ def notifyBuild(Map args) {
   }
 
   // Send notifications
-  slackSend (color: colorCode, message: "${args.build_status} - ${args.branch_name}:${args.git_commit_id} \nDeployment URL - (<${args.branch_name}.${args.deployment_url}|Open>)")
+  slackSend (color: colorCode, message: "${buildStatus} - ${args.branch_name}:${args.git_commit_id} \nDeployment URL - (<${args.branch_name}.${args.deployment_url}|Open>)")
 }
 
 def start(String configFile) {
@@ -312,7 +312,7 @@ def start(String configFile) {
           branch_name      : config.BRANCH_NAME,
           deployment_url   : config.deployment_url ?: 'example.com',
           git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-          buildStatus      : 'SUCCESSFUL'
+          build_status      : 'SUCCESSFUL'
         )
       }
     }
