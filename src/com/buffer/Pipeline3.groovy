@@ -141,8 +141,12 @@ def containerBuildPub(Map args) {
 }
 
 def notifyBuild(Map args) {
+  println "Notify Slack Channel"
+
   // build status of null means successful
   buildStatus =  args.build_status ?: 'SUCCESSFUL'
+  def subject = "${buildStatus}: Job '${args.branch_name}:${args.git_commit_id}'"
+  def summary = "${subject} (${args.branch_name}.${args.deployment_url})"
 
   // Default values
   def colorCode = '#FF0000'
