@@ -161,7 +161,7 @@ def notifyBuild(Map args) {
   }
 
   // Send notifications
-  slackSend (color: colorCode, message: "${buildStatus} - ${args.branch_name}:${args.git_commit_id} \nDeployment URL - (<${args.branch_name}.${args.deployment_url}|Open>)")
+  slackSend (color: colorCode, message: summary)
 }
 
 def start(String configFile) {
