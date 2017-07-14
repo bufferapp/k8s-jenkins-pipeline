@@ -146,7 +146,7 @@ def notifyBuild(Map args) {
   // build status of null means successful
   buildStatus =  args.build_status ?: 'SUCCESSFUL'
   def subject = "${buildStatus}: Job '${args.branch_name}:${args.git_commit_id}'"
-  def summary = "${subject} (${args.branch_name}.${args.deployment_url})"
+  def summary = "${subject} (https://${args.branch_name}.${args.deployment_url})"
 
   // Default values
   def colorCode = '#FF0000'
@@ -190,7 +190,7 @@ def start(String configFile) {
 
         notifyBuild(
           branch_name      : config.BRANCH_NAME,
-          deployment_url   : config.deployment_url ?: 'example.com',
+          deployment_url   : config.app.deployment_url ?: 'example.com',
           git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
           build_status     : 'STARTED'
         )
@@ -314,9 +314,9 @@ def start(String configFile) {
 
         notifyBuild(
           branch_name      : config.BRANCH_NAME,
-          deployment_url   : config.deployment_url ?: 'example.com',
+          deployment_url   : config.app.deployment_url,
           git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-          build_status      : 'SUCCESSFUL'
+          build_status     : 'SUCCESSFUL'
         )
       }
     }
