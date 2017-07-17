@@ -109,11 +109,21 @@ def helmLint(String chart_dir) {
 
 }
 
+def shortenLongReleaseName(String branchName, String chartName) {
+  def releaseName = "${branchName}-${chartName}"
+  if (releaseName.length() > 45) {
+    releaseName = branchName.substring(0, releaseName.length() - 45) + chartName
+  }
+
+  return releaseName
+}
+
 def helmDeploy(Map args) {
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
     def overrides = "image.tag=${args.version_tag},branchName=${args.branch_name}"
+    def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
     if (args.branch_name == 'master') {
@@ -123,10 +133,10 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.branch_name}-${args.name} ${args.chart_dir} --set ${overrides} --namespace=${args.namespace}"
+        sh "helm upgrade --dry-run --install ${releaseName} ${args.chart_dir} --set ${overrides} --namespace=${args.namespace}"
     } else {
         println "Running deployment"
-        sh "helm upgrade --install --wait ${args.branch_name}-${args.name} ${args.chart_dir} --set ${overrides} --namespace=${args.namespace}"
+        sh "helm upgrade --install --wait ${releaseName} ${args.chart_dir} --set ${overrides} --namespace=${args.namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
@@ -134,8 +144,9 @@ def helmDeploy(Map args) {
 
 def helmTest(Map args) {
     println "Running Helm test"
+    def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
-    sh "helm test ${args.branch_name}-${args.name} --cleanup"
+    sh "helm test ${releaseName} --cleanup"
 }
 
 def containerBuildPub(Map args) {
@@ -195,12 +206,12 @@ def start(String configFile) {
         def pwd = pwd()
         def chart_dir = "${pwd}/${config.app.name}"
 
-        notifyBuild(
-          branch_name      : config.BRANCH_NAME,
-          deployment_url   : config.app.deployment_url ?: 'example.com',
-          git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-          build_status     : 'STARTED'
-        )
+        // notifyBuild(
+        //   branch_name      : config.BRANCH_NAME,
+        //   deployment_url   : config.app.deployment_url ?: 'example.com',
+        //   git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+        //   build_status     : 'STARTED'
+        // )
 
         // continue only if pipeline enabled
         if (!config.pipeline.enabled) {
@@ -273,60 +284,37 @@ def start(String configFile) {
           }
         }
 
-        // deploy only the master branch
-        // For now we deploy all branches
-        if (config.BRANCH_NAME == 'master') {
-          stage ('Deploy to k8s with Helm') {
-            container('helm') {
-              // Deploy using Helm chart
-              helmDeploy(
-                dry_run       : false,
+        stage ('Deploy to k8s with Helm') {
+          container('helm') {
+            // Deploy using Helm chart
+            helmDeploy(
+              dry_run       : false,
+              name          : config.app.name,
+              namespace     : config.app.namespace,
+              version_tag   : image_tags_list.get(0),
+              chart_dir     : chart_dir,
+              branch_name   : config.BRANCH_NAME
+            )
+
+            //  Run helm tests
+            if (config.app.test) {
+              helmTest(
                 name          : config.app.name,
-                namespace     : config.app.namespace,
-                version_tag   : image_tags_list.get(0),
-                chart_dir     : chart_dir,
                 branch_name   : config.BRANCH_NAME
               )
-
-              //  Run helm tests
-              if (config.app.test) {
-                helmTest(
-                  name          : config.app.name,
-                  branch_name   : config.BRANCH_NAME
-                )
-              }
-            }
-          }
-        } else {
-          stage ('Deploy to k8s with Helm') {
-            container('helm') {
-              // Deploy using Helm chart
-              helmDeploy(
-                dry_run       : false,
-                name          : config.app.name,
-                namespace     : config.app.namespace,
-                version_tag   : image_tags_list.get(0),
-                chart_dir     : chart_dir,
-                branch_name   : config.BRANCH_NAME
-              )
-
-              //  Run helm tests
-              if (config.app.test) {
-                helmTest(
-                  name          : config.app.name,
-                  branch_name   : config.BRANCH_NAME
-                )
-              }
             }
           }
         }
 
-        notifyBuild(
-          branch_name      : config.BRANCH_NAME,
-          deployment_url   : config.app.deployment_url,
-          git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-          build_status     : 'SUCCESSFUL'
-        )
+        // Only notify master production deploys
+        if (config.BRANCH_NAME == 'master') {
+          notifyBuild(
+            branch_name      : config.BRANCH_NAME,
+            deployment_url   : config.app.deployment_url,
+            git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+            build_status     : 'SUCCESSFUL'
+          )
+        }
       }
     }
 }
