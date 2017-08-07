@@ -114,9 +114,6 @@ def start(String configFile) {
         config = config + gitVars()
         println "pipeline config ==> ${config}"
 
-        def pwd = pwd()
-        def chart_dir = "${pwd}/${config.app.name}"
-
         // tag image with version, and branch-commit_id
         def image_tags_map = getContainerTags(config)
 
