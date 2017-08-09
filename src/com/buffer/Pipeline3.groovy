@@ -122,12 +122,12 @@ def helmDeploy(Map args) {
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
-    def overrides = "image.tag=${args.version_tag},branchName=${args.branch_name}"
+    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name}"
     def releaseName = shortenLongReleaseName(args.branch_name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
     if (args.branch_name == 'master') {
-      overrides = "${overrides},ingress.enabled=false"
+      overrides = "${overrides},ingress.enabled=false,track=stable"
     }
 
     if (args.dry_run) {
