@@ -162,9 +162,16 @@ def notifyBuild(Map args) {
   println "Notify Slack Channel"
 
   // build status of null means successful
+  def branchSubdomain = args.branch_name
+  if (branchSubdomain == 'master') {
+    branchSubdomain = ''
+  } else {
+    branchSubdomain = "${branchSubdomain}."
+  }
+
   buildStatus =  args.build_status ?: 'SUCCESSFUL'
   def subject = "${buildStatus}: Job '${args.branch_name}:${args.git_commit_id}'"
-  def summary = "${subject} (https://${args.branch_name}.${args.deployment_url})"
+  def summary = "${subject} (https://${branchSubdomain}${args.deployment_url})"
 
   // Default values
   def colorCode = '#FF0000'
