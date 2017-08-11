@@ -9,6 +9,19 @@ volumes:[
 ]){
 
   node ('pipeline-pod') {
+   properties([
+      pipelineTriggers([
+       [$class: 'GenericTrigger',
+        genericVariables: [
+         [expressionType: 'JSONPath', key: 'hook_id', value: '$.hook_id'],
+         [expressionType: 'JSONPath', key: 'zen', value: '$.zen']
+        ],
+        genericHeaderVariables: [
+            [key: 'X-GitHub-Event', regexpFilter: '']
+        ]
+       ]
+      ])
+    ])
     stage("build") {
     sh '''
     echo Build $zen before $hook_id in $X_GitHub_Event
