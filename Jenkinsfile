@@ -13,7 +13,8 @@ volumes:[
                 [$class: 'GenericTrigger',
                     genericVariables: [
                         [expressionType: 'JSONPath', key: 'branchName', value: '$.ref'],
-                        [expressionType: 'JSONPath', key: 'refType', value: '$.ref_type']
+                        [expressionType: 'JSONPath', key: 'refType', value: '$.ref_type'],
+                        [expressionType: 'JSONPath', key: 'repoName', value: '$.repository.name']
                     ],
                     genericHeaderVariables: [
                         [key: 'X-GitHub-Event']
@@ -30,8 +31,12 @@ volumes:[
                 def refType = refType
                 if (eventType == 'delete' && refType == 'branch') {
                     def branchName = branchName.replace("/", "-")
+                    def releaseName = "${branchName}-${repoName}"
+                    if (releaseName.length() > 63) {
+                        releaseName = releaseName.substring(0, 63)
+                    }
                     if (branchName) {
-                        sh "helm delete --purge ${branchName}"
+                        sh "helm delete --purge ${releaseName}"
                     }
                 }
             }

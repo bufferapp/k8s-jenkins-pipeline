@@ -111,8 +111,8 @@ def helmLint(String chart_dir) {
 
 def shortenLongReleaseName(String branchName, String chartName) {
   def releaseName = "${branchName}-${chartName}"
-  if (releaseName.length() > 45) {
-    releaseName = branchName.substring(0, releaseName.length() - 45) + chartName
+  if (releaseName.length() > 63) {
+    releaseName = releaseName.substring(0, 63)
   }
 
   return releaseName
