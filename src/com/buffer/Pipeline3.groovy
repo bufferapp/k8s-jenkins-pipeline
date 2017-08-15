@@ -109,10 +109,10 @@ def helmLint(String chart_dir) {
 
 }
 
-def shortenLongReleaseName(String branchName) {
-  def releaseName = "${branchName}"
-  if (releaseName.length() > 40) {
-    releaseName = branchName.substring(0, releaseName.length() - 45)
+def shortenLongReleaseName(String branchName, String chartName) {
+  def releaseName = "${branchName}-${chartName}"
+  if (releaseName.length() > 45) {
+    releaseName = branchName.substring(0, releaseName.length() - 45) + chartName
   }
 
   return releaseName
@@ -123,7 +123,7 @@ def helmDeploy(Map args) {
     helmConfig()
 
     def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},branchSubdomain=${args.branch_name}."
-    def releaseName = shortenLongReleaseName(args.branch_name)
+    def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
     if (args.branch_name == 'master') {
@@ -144,7 +144,7 @@ def helmDeploy(Map args) {
 
 def helmTest(Map args) {
     println "Running Helm test"
-    def releaseName = shortenLongReleaseName(args.branch_name)
+    def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     sh "helm test ${releaseName} --cleanup"
 }

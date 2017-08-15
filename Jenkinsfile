@@ -12,7 +12,8 @@ volumes:[
             pipelineTriggers([
                 [$class: 'GenericTrigger',
                     genericVariables: [
-                        [expressionType: 'JSONPath', key: 'branchName', value: '$.ref']
+                        [expressionType: 'JSONPath', key: 'branchName', value: '$.ref'],
+                        [expressionType: 'JSONPath', key: 'refType', value: '$.ref_type']
                     ],
                     genericHeaderVariables: [
                         [key: 'X-GitHub-Event']
@@ -26,7 +27,8 @@ volumes:[
             '''
             container('helm') {
                 def eventType = X_GitHub_Event
-                if (eventType == 'delete') {
+                def refType = refType
+                if (eventType == 'delete' && refType == 'branch') {
                     def branchName = branchName.replace("/", "-")
                     if (branchName) {
                         sh "helm delete --purge ${branchName}"
