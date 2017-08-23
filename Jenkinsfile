@@ -31,6 +31,7 @@ volumes:[
                 def refType = refType
                 if (eventType == 'delete' && refType == 'branch') {
                     def branchName = branchName.replace("/", "-")
+                    def repoName = repoName
                     def releaseName = "${branchName}-${repoName}"
                     if (releaseName.length() > 63) {
                         releaseName = releaseName.substring(0, 63)
