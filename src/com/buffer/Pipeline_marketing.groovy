@@ -315,7 +315,8 @@ def start(String configFile) {
               namespace     : config.app.namespace,
               version_tag   : image_tags_list.get(0),
               chart_dir     : chart_dir,
-              branch_name   : config.BRANCH_NAME
+              branch_name   : config.BRANCH_NAME,
+              nginxconf     : config.nginxConf
             )
 
             //  Run helm tests
