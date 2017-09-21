@@ -268,7 +268,7 @@ def start(String configFile) {
           if (fileExists('nginx/marketing_routes')) {
             nginxConf = readFile('nginx/marketing_routes')
             nginxConf = nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
-            nginxConf = nginxConf.replaceAll('#.*', '')
+            nginxConf = nginxConf.replaceAll('#.*[\r|\n]', '')
             print "nginx routes ===> ${nginxConf}"
 
             config['nginxConf'] = nginxConf
