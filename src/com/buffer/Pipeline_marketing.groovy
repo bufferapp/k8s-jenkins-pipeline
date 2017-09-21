@@ -264,17 +264,18 @@ def start(String configFile) {
             )
           }
         }
+        stage ('Set Nginx Routing') {
+          if (fileExists('nginx/marketing_routes')) {
+            nginxConf = readFile('nginx/marketing_routes')
+            nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
+            print "nginx routes ===> ${nginxConf}"
 
-        if (fileExists('nginx/marketing_routes')) {
-          nginxConf = readFile('nginx/marketing_routes')
-          nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
-          print "nginx routes ===> ${nginxConf}"
+            config['nginxConf'] = nginxConf
 
-          config['nginxConf'] = nginxConf
-
-        } else {
-          println "Couldn't find the routing info. Exit the build"
-          return
+          } else {
+            println "Couldn't find the routing info. Exit the build"
+            return
+          }
         }
 
         if (fileExists('pre-build.sh')) {
