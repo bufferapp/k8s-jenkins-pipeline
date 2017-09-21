@@ -264,10 +264,11 @@ def start(String configFile) {
             )
           }
         }
-        stage ('Set Nginx Routing') {
+        stage ('Set Nginx Reverse Proxy Routing') {
           if (fileExists('nginx/marketing_routes')) {
             nginxConf = readFile('nginx/marketing_routes')
             nginxConf = nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
+            nginxConf = nginxConf.replaceAll('#.*', '')
             print "nginx routes ===> ${nginxConf}"
 
             config['nginxConf'] = nginxConf
