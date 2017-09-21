@@ -267,7 +267,7 @@ def start(String configFile) {
         stage ('Set Nginx Routing') {
           if (fileExists('nginx/marketing_routes')) {
             nginxConf = readFile('nginx/marketing_routes')
-            nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
+            nginxConf = nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
             print "nginx routes ===> ${nginxConf}"
 
             config['nginxConf'] = nginxConf
