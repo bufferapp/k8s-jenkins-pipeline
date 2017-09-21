@@ -124,7 +124,7 @@ def helmDeploy(Map args) {
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
-    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},branchSubdomain=${args.branch_name}."
+    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},branchSubdomain=${args.branch_name}.,reverse-proxy.configmap.nginxconf=${args.nginxConf}"
     def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
@@ -263,6 +263,18 @@ def start(String configFile) {
               branch_name   : config.BRANCH_NAME
             )
           }
+        }
+
+        if (fileExists('nginx/marketing_routes')) {
+          nginxConf = readFile('nginx/marketing_routes')
+          nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
+          print "nginx routes ===> ${nginxConf}"
+
+          config['nginxConf'] = nginxConf
+
+        } else {
+          println "Couldn't find the routing info. Exit the build"
+          return
         }
 
         if (fileExists('pre-build.sh')) {
