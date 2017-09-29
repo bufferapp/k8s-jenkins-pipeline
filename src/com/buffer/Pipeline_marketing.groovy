@@ -331,13 +331,13 @@ def start(String configFile) {
         }
 
         // Only notify master production deploys
-        if (config.BRANCH_NAME == 'master') {
-          notifyBuild(
-            branch_name      : config.BRANCH_NAME,
-            deployment_url   : config.app.deployment_url,
-            git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-            build_status     : 'SUCCESSFUL'
-          )
+        // if (config.BRANCH_NAME == 'master') {
+        //   notifyBuild(
+        //     branch_name      : config.BRANCH_NAME,
+        //     deployment_url   : config.app.deployment_url,
+        //     git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+        //     build_status     : 'SUCCESSFUL'
+        //   )
         }
       }
     }
