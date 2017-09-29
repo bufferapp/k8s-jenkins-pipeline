@@ -338,7 +338,7 @@ def start(String configFile) {
         //     git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
         //     build_status     : 'SUCCESSFUL'
         //   )
-        }
+        // }
       }
     }
 }
