@@ -270,8 +270,8 @@ def start(String configFile) {
             nginxConf = nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
             nginxConf = nginxConf.replaceAll('#.*[\r|\n]', '')
             print "nginx routes ===> ${nginxConf}"
-
-            config['nginxConf'] = nginxConf
+            writeFile('nginx/marketing_routes', nginxConf)
+            // config['nginxConf'] = nginxConf
 
           } else {
             println "Couldn't find the routing info. Exit the build"
