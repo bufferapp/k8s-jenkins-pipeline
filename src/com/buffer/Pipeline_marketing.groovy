@@ -248,6 +248,21 @@ def start(String configFile) {
         // compile tag list
         def image_tags_list = getMapValues(image_tags_map)
 
+        stage ('Set Nginx Reverse Proxy Routing') {
+          if (fileExists('buffer-marketing/charts/reverse-proxy/marketing_routes')) {
+            nginxConf = readFile('nginx/marketing_routes')
+            nginxConf = nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
+            nginxConf = nginxConf.replaceAll('#.*[\r|\n]', '')
+            print "nginx routes ===> ${nginxConf}"
+            writeFile('buffer-marketing/charts/reverse-proxy/marketing_routes', nginxConf)
+            // config['nginxConf'] = nginxConf
+
+          } else {
+            println "Couldn't find the routing info. Exit the build"
+            return
+          }
+        }
+
         stage ('Test Helm Chart Deployment') {
           container('helm') {
             // run helm chart linter
@@ -262,20 +277,6 @@ def start(String configFile) {
               chart_dir     : chart_dir,
               branch_name   : config.BRANCH_NAME
             )
-          }
-        }
-        stage ('Set Nginx Reverse Proxy Routing') {
-          if (fileExists('buffer-marketing/charts/reverse-proxy/marketing_routes')) {
-            nginxConf = readFile('nginx/marketing_routes')
-            nginxConf = nginxConf.replaceAll('http://marketing', 'http://master-buffer-marketing-buffer-marketing.test')
-            nginxConf = nginxConf.replaceAll('#.*[\r|\n]', '')
-            print "nginx routes ===> ${nginxConf}"
-            writeFile('buffer-marketing/charts/reverse-proxy/marketing_routes', nginxConf)
-            // config['nginxConf'] = nginxConf
-
-          } else {
-            println "Couldn't find the routing info. Exit the build"
-            return
           }
         }
 
