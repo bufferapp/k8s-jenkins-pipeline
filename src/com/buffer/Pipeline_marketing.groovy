@@ -251,7 +251,8 @@ def start(String configFile) {
         stage ('Set Nginx Reverse Proxy Routing') {
           if (fileExists('buffer-marketing/charts/reverse-proxy/marketing_routes')) {
             nginxConf = readFile('buffer-marketing/charts/reverse-proxy/marketing_routes')
-            replacementString = 'http://${shortenLongReleaseName(config.BRANCH_NAME, config.app.name)}.${config.app.namespace}'
+            def replacementString = "http://${shortenLongReleaseName(config.BRANCH_NAME, config.app.name)}.${config.app.namespace}"
+            print "Replacement String ===> ${replacementString}"
             nginxConf = nginxConf.replaceAll('http://marketing', replacementString)
             nginxConf = nginxConf.replaceAll('#.*[\r|\n]', '')
             print "nginx routes ===> ${nginxConf}"
