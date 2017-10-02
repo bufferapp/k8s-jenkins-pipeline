@@ -124,7 +124,7 @@ def helmDeploy(Map args) {
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
-    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},branchSubdomain=${args.branch_name}.,reverse-proxy.configmap.nginxconf='${args.nginxConf}'"
+    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},branchSubdomain=${args.branch_name}."
     def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
@@ -258,7 +258,6 @@ def start(String configFile) {
               'file': 'buffer-marketing/charts/reverse-proxy/marketing_routes',
               'text': nginxConf
             )
-            // config['nginxConf'] = nginxConf
 
           } else {
             println "Couldn't find the routing info. Exit the build"
@@ -320,8 +319,7 @@ def start(String configFile) {
               namespace     : config.app.namespace,
               version_tag   : image_tags_list.get(0),
               chart_dir     : chart_dir,
-              branch_name   : config.BRANCH_NAME,
-              nginxConf     : config.nginxConf
+              branch_name   : config.BRANCH_NAME
             )
 
             //  Run helm tests
@@ -334,15 +332,15 @@ def start(String configFile) {
           }
         }
 
-        // Only notify master production deploys
-        // if (config.BRANCH_NAME == 'master') {
-        //   notifyBuild(
-        //     branch_name      : config.BRANCH_NAME,
-        //     deployment_url   : config.app.deployment_url,
-        //     git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
-        //     build_status     : 'SUCCESSFUL'
-        //   )
-        // }
+        Only notify master production deploys
+        if (config.BRANCH_NAME == 'master') {
+          notifyBuild(
+            branch_name      : config.BRANCH_NAME,
+            deployment_url   : config.app.deployment_url,
+            git_commit_id    : config.GIT_COMMIT_ID.substring(0, 7),
+            build_status     : 'SUCCESSFUL'
+          )
+        }
       }
     }
 }
