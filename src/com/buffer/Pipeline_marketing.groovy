@@ -332,7 +332,7 @@ def start(String configFile) {
           }
         }
 
-        Only notify master production deploys
+        // Only notify master production deploys
         if (config.BRANCH_NAME == 'master') {
           notifyBuild(
             branch_name      : config.BRANCH_NAME,
