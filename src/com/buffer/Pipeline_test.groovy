@@ -128,6 +128,8 @@ def helmDeploy(Map args) {
     // Master for prod deploy w/o ingress (using it's own ELB)
     if (args.branch_name == 'master') {
       overrides = "${overrides},ingress.enabled=false,track=stable,branchSubdomain=''"
+    } else {
+      args.namespace = "dev"
     }
 
     if (args.dry_run) {
