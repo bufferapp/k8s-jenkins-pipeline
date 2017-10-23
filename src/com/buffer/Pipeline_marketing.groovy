@@ -130,9 +130,7 @@ def helmDeploy(Map args) {
     // Master for prod deploy w/o ingress (using it's own ELB)
     if (args.branch_name == 'master') {
       overrides = "${overrides},reverse-proxy.ingress.enabled=false,track=stable,branchSubdomain=''"
-    } else {
-      args.namespace = "dev"
-     }
+    }
 
     if (args.dry_run) {
         println "Running dry-run deployment"
@@ -212,6 +210,11 @@ def start(String configFile) {
         def inputFile = readFile(configFile)
         def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
         config = config + gitVars()
+
+        if (config.BRANCH_NAME != 'master') {
+          config.app.namespace = 'dev'
+        }
+
         println "pipeline config ==> ${config}"
 
         def pwd = pwd()
