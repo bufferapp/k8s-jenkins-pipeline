@@ -1,5 +1,7 @@
 #!/usr/bin/groovy
 
+// Extended from Pipeline4
+
 package com.buffer;
 
 def gitVars() {
@@ -122,14 +124,12 @@ def helmDeploy(Map args) {
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
-    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},branchSubdomain=${args.branch_name}-"
+    def overrides = "image.tag=${args.version_tag},track=staging,branchName=${args.branch_name},reverse-proxy.branchSubdomain=${args.branch_name}-"
     def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
-    if (args.branch_name == 'master') {
-      overrides = "${overrides},ingress.enabled=false,track=stable,branchSubdomain=''"
-    } else {
-      args.namespace = "dev"
+    if ('master' == 'master') {
+      overrides = "${overrides},reverse-proxy.ingress.enabled=false,reverse-proxy.production.enabled=true,track=stable,branchSubdomain=''"
     }
 
     if (args.dry_run) {
@@ -210,6 +210,11 @@ def start(String configFile) {
         def inputFile = readFile(configFile)
         def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
         config = config + gitVars()
+
+        if (config.BRANCH_NAME != 'master') {
+          config.app.namespace = 'dev'
+        }
+
         println "pipeline config ==> ${config}"
 
         def pwd = pwd()
@@ -247,6 +252,23 @@ def start(String configFile) {
 
         // compile tag list
         def image_tags_list = getMapValues(image_tags_map)
+
+        stage ('Set Nginx Reverse Proxy Routing') {
+          if (fileExists('buffer-marketing/charts/reverse-proxy/marketing_routes')) {
+            nginxConf = readFile('buffer-marketing/charts/reverse-proxy/marketing_routes')
+            nginxConf = nginxConf.replaceAll('http://marketing', "http://${shortenLongReleaseName(config.BRANCH_NAME, config.app.name)}-${config.app.name}.${config.app.namespace}")
+            nginxConf = nginxConf.replaceAll('#.*[\r|\n]', '')
+            print "nginx routes ===> ${nginxConf}"
+            writeFile(
+              'file': 'buffer-marketing/charts/reverse-proxy/marketing_routes',
+              'text': nginxConf
+            )
+
+          } else {
+            println "Couldn't find the routing info. Exit the build"
+            return
+          }
+        }
 
         stage ('Test Helm Chart Deployment') {
           container('helm') {
