@@ -129,7 +129,7 @@ def helmDeploy(Map args) {
 
     // Master for prod deploy w/o ingress (using it's own ELB)
     if (args.branch_name == 'master') {
-      overrides = "${overrides},reverse-proxy.ingress.enabled=false,reverse-proxy.production.enabled=true,track=stable,branchSubdomain=''"
+      overrides = "${overrides},reverse-proxy.ingress.enabled=false,reverse-proxy.production.enabled=true,production.enabled=true,track=stable,branchSubdomain=''"
     }
 
     if (args.dry_run) {
