@@ -134,7 +134,7 @@ def helmDeploy(Map args) {
     def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
-    if (args.branch_name == 'master') {
+    if ('master' == 'master') {
       overrides = "${overrides},reverse-proxy.ingress.enabled=false,reverse-proxy.production.enabled=true,production.enabled=true,track=stable,branchSubdomain=''"
     }
 
