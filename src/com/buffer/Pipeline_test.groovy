@@ -113,9 +113,15 @@ def helmLint(String chart_dir) {
 
 def shortenLongReleaseName(String branchName, String chartName) {
   def releaseName = "${branchName}-${chartName}"
-  if (releaseName.length() > 63) {
-    releaseName = releaseName.substring(0, 63)
+  def resourceName = "${branchName}-${chartName}-${chartName}"
+
+  def allowedLength = 53
+  if (releaseName.length() > 53 || resourceName.length() > 63) {
+    allowedLength = (chartName.length() + 1) < 10 ? 53 : (63 - (chartName.length() + 1))
+    println "Shortned the release name to length: ${allowedLength}"
   }
+
+  releaseName = releaseName.substring(0, allowedLength)
 
   return releaseName
 }
@@ -128,8 +134,8 @@ def helmDeploy(Map args) {
     def releaseName = shortenLongReleaseName(args.branch_name, args.name)
 
     // Master for prod deploy w/o ingress (using it's own ELB)
-    if ('master' == 'master') {
-      overrides = "${overrides},reverse-proxy.ingress.enabled=false,reverse-proxy.production.enabled=true,track=stable,branchSubdomain=''"
+    if (args.branch_name == 'master') {
+      overrides = "${overrides},reverse-proxy.ingress.enabled=false,reverse-proxy.production.enabled=true,production.enabled=true,track=stable,branchSubdomain=''"
     }
 
     if (args.dry_run) {
