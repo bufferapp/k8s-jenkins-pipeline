@@ -122,6 +122,8 @@ def shortenLongReleaseName(String branchName, String chartName) {
   }
 
   releaseName = releaseName.substring(0, allowedLength)
+  // remove trailing -, if any
+  releaseName = releaseName.replaceAll('-+$', '')
 
   return releaseName
 }
